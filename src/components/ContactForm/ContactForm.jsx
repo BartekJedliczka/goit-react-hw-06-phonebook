@@ -1,30 +1,35 @@
-import React, { useState } from 'react';
+import { nanoid } from 'nanoid';
+import { Report } from 'notiflix/build/notiflix-report-aio';
+import { useDispatch, useSelector } from 'react-redux';
+import { getContacts } from 'redux/selectors';
+import { addContact } from 'redux/contactsSlice';
 import css from './ContactForm.module.css';
-import PropTypes from 'prop-types';
 
-const ContactForm = ({ onSubmit }) => {
-  const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
+export const ContactForm = () => {
+  const contacts = useSelector(getContacts);
+  const dispatch = useDispatch();
 
-  const handleInputChange = event => {
-    const prop = event.currentTarget.name;
-    switch (prop) {
-      case 'name':
-        setName(event.currentTarget.value);
-        break;
-      case 'number':
-        setNumber(event.currentTarget.value);
-        break;
-      default:
-        throw new Error('Error');
+  const handleSubmit = event => {
+    event.preventDefault();
+    const form = event.target;
+    const { name, number } = form.elements;
+
+    const contact = {
+      id: nanoid(),
+      name: name.value,
+      number: number.value,
+    };
+
+    if (contacts.find(contact => contact.name === name.value)) {
+      Report.warning(
+        'Phonebook Warning',
+        'The contact already exists with this name',
+        'Okay'
+      );
+      return;
     }
-  };
-
-  const handleSubmit = e => {
-    e.preventDefault();
-    onSubmit({ name, number });
-    setName('');
-    setNumber('');
+    dispatch(addContact(contact));
+    form.reset();
   };
 
   return (
@@ -35,8 +40,6 @@ const ContactForm = ({ onSubmit }) => {
           className={css.input}
           type="text"
           name="name"
-          value={name}
-          onChange={handleInputChange}
           autoComplete="off"
           placeholder="e.g. John Doe"
           pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
@@ -48,8 +51,6 @@ const ContactForm = ({ onSubmit }) => {
           className={css.input}
           type="tel"
           name="number"
-          value={number}
-          onChange={handleInputChange}
           autoComplete="off"
           placeholder="e.g. 560-432-234"
           pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
@@ -64,9 +65,3 @@ const ContactForm = ({ onSubmit }) => {
     </>
   );
 };
-
-ContactForm.propTypes = {
-  onSubmit: PropTypes.func,
-};
-
-export default ContactForm;
