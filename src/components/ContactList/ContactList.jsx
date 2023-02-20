@@ -1,33 +1,44 @@
-import React from 'react';
-import css from './ContactList.module.css';
-import PropTypes from 'prop-types';
+import { Report } from 'notiflix/build/notiflix-report-aio';
+import { getFilter, getContacts } from 'redux/selectors';
+import { useSelector, useDispatch } from 'react-redux';
+import { deleteContact } from 'redux/contactsSlice';
+import style from './ContactList.module.css';
 
-const ContactList = ({ contacts, deleteContact }) => {
+export const ContactList = () => {
+  const contacts = useSelector(getContacts);
+  const filters = useSelector(getFilter);
+  const dispatch = useDispatch();
+
+  const handleDelete = id => {
+    dispatch(deleteContact(id));
+  };
+  const filteredContacts = contacts.filter(contact =>
+    contact.name.toLowerCase().includes(filters.toLowerCase())
+  );
+
   return (
     <>
-      <ul className={css.list}>
-        {contacts.map(({ id, name, number }) => (
-          <li className={css.item} key={id}>
-            {name}: <b>{number}</b>
-            <button className={css.button} onClick={() => deleteContact(id)}>
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
+      {contacts.length === 0 ? (
+        Report.info('Phonebook Info', 'Contact book is empty!', 'Okay')
+      ) : (
+        <ul className={style.list}>
+          {filteredContacts.map(({ id, name, number }) => (
+            <li className={style.item} key={id}>
+              <p>
+                {name}: {number}
+              </p>
+              <button
+                className={style.button}
+                type="button"
+                onClick={() => handleDelete(id)}
+                value="delete"
+              >
+                Delete contact
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </>
   );
 };
-
-ContactList.propTypes = {
-  contacts: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      number: PropTypes.string.isRequired,
-    })
-  ),
-  deleteContact: PropTypes.func,
-};
-
-export default ContactList;
