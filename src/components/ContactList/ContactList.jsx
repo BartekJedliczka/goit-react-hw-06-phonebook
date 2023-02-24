@@ -1,4 +1,3 @@
-import { Report } from 'notiflix/build/notiflix-report-aio';
 import { getFilter, getContacts } from 'redux/selectors';
 import { useSelector, useDispatch } from 'react-redux';
 import { deleteContact } from 'redux/contactsSlice';
@@ -18,27 +17,23 @@ export const ContactList = () => {
 
   return (
     <>
-      {contacts.length === 0 ? (
-        Report.info('Phonebook Info', 'Contact book is empty!', 'Okay')
-      ) : (
-        <ul className={css.list}>
-          {filteredContacts.map(({ id, name, number }) => (
-            <li className={css.item} key={id}>
-              <p>
-                {name}: {number}
-              </p>
-              <button
-                className={css.button}
-                type="button"
-                onClick={() => handleDelete(id)}
-                value="delete"
-              >
-                Delete contact
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <ul className={css.list}>
+        {filteredContacts.map(({ id, name, number }) => (
+          <li className={css.item} key={id}>
+            <p>
+              {name}: {number}
+            </p>
+            <button
+              className={css.button}
+              type="button"
+              onClick={() => handleDelete(id)}
+              value="delete"
+            >
+              Delete contact
+            </button>
+          </li>
+        ))}
+      </ul>
     </>
   );
 };
